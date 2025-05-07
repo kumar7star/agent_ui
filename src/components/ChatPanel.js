@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function ChatPanel({ onClose }) {
+function ChatPanel({ onClose, uploadStatus, selectedFile }) {
   const [message, setMessage] = useState('');
   
   const tools = [
@@ -11,6 +11,84 @@ function ChatPanel({ onClose }) {
     { name: 'Tracan LLM', icon: 'T', color: 'bg-gray-600' },
     { name: 'Website Scraper', icon: 'WS', color: 'bg-blue-300' }
   ];
+
+  // Function to render file icon based on file type
+  const getFileIcon = () => {
+    if (!selectedFile) return null;
+    
+    const fileExtension = selectedFile.name.split('.').pop().toLowerCase();
+    
+    if (['pdf'].includes(fileExtension)) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      );
+    } else if (['doc', 'docx'].includes(fileExtension)) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      );
+    } else {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+      );
+    }
+  };
+
+  // Render upload status message
+  const renderUploadStatus = () => {
+    if (!uploadStatus || !selectedFile) return null;
+
+    if (uploadStatus === 'uploading') {
+      return (
+        <div className="bg-gray-700 rounded-lg p-3 mb-4">
+          <p className="text-sm mb-2">Document is uploading</p>
+          <div className="flex items-center bg-gray-800 rounded-lg p-2">
+            <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
+              {getFileIcon()}
+            </div>
+            <div>
+              <p className="text-sm font-medium">{selectedFile.name}</p>
+            </div>
+          </div>
+        </div>
+      );
+    } else if (uploadStatus === 'uploaded') {
+      return (
+        <div className="bg-gray-700 rounded-lg p-3 mb-4">
+          <p className="text-sm mb-2">Document is uploaded</p>
+          <div className="mb-2">
+            <div className="flex items-center bg-gray-800 rounded-lg p-2 mb-1">
+              <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
+                {getFileIcon()}
+              </div>
+              <div>
+                <p className="text-sm font-medium">{selectedFile.name}</p>
+                <p className="text-xs text-gray-400">Uploaded on {new Date().toLocaleDateString()}</p>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col space-y-2">
+            <button className="bg-transparent hover:bg-pink-900 text-pink-500 border border-pink-500 rounded-full py-2 px-4 text-sm transition-colors">
+              Create a Proposal
+            </button>
+            <button className="bg-transparent hover:bg-pink-900 text-pink-500 border border-pink-500 rounded-full py-2 px-4 text-sm transition-colors">
+              Create Data Analysis Plan
+            </button>
+            <button className="bg-transparent hover:bg-pink-900 text-pink-500 border border-pink-500 rounded-full py-2 px-4 text-sm transition-colors">
+              Create Development Plan
+            </button>
+          </div>
+        </div>
+      );
+    }
+    
+    return null;
+  };
 
   return (
     <div className="bg-gray-800 h-full flex flex-col border-l border-gray-700">
@@ -62,11 +140,17 @@ function ChatPanel({ onClose }) {
       
       {/* Chat Messages */}
       <div className="flex-1 overflow-auto p-4">
-        <div className="bg-gray-700 rounded-lg p-3 mb-4">
-          <p className="text-sm">
-            Hello, I'm Analyst Sam. How may I assist you today?
-          </p>
-        </div>
+        {/* Welcome message (only show if no upload status) */}
+        {!uploadStatus && (
+          <div className="bg-gray-700 rounded-lg p-3 mb-4">
+            <p className="text-sm">
+              Hello, I'm Analyst Sam. How may I assist you today?
+            </p>
+          </div>
+        )}
+        
+        {/* Upload status message */}
+        {renderUploadStatus()}
       </div>
       
       {/* Input */}

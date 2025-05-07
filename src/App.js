@@ -5,6 +5,20 @@ import ChatPanel from './components/ChatPanel';
 
 function App() {
   const [isChatOpen, setIsChatOpen] = useState(true);
+  const [uploadStatus, setUploadStatus] = useState(null); // null, 'uploading', or 'uploaded'
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  // Function to handle file upload status changes
+  const handleFileUpload = (status, file = null) => {
+    setUploadStatus(status);
+    if (file) {
+      setSelectedFile(file);
+    }
+    // Ensure chat panel is open when uploading
+    if (status && !isChatOpen) {
+      setIsChatOpen(true);
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-900 text-white">
@@ -36,10 +50,14 @@ function App() {
           </div>
         </header>
         <main className="flex-1 overflow-auto relative">
-          <MainContent />
+          <MainContent onFileUpload={handleFileUpload} />
           {isChatOpen && (
             <div className="absolute top-0 right-0 w-80 h-full">
-              <ChatPanel onClose={() => setIsChatOpen(false)} />
+              <ChatPanel 
+                onClose={() => setIsChatOpen(false)} 
+                uploadStatus={uploadStatus}
+                selectedFile={selectedFile}
+              />
             </div>
           )}
         </main>

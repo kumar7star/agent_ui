@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
-function MainContent() {
+function MainContent({ onFileUpload }) {
   // Create a reference for the file input
   const fileInputRef = useRef(null);
   
@@ -9,8 +9,15 @@ function MainContent() {
     const file = event.target.files[0];
     if (file) {
       console.log('File selected:', file.name);
-      // Here you can continue with the flow as it is
-      // For example, you might want to upload the file or process it
+      
+      // Show "Document is uploading" in the chat panel
+      onFileUpload('uploading', file);
+      
+      // Simulate file upload with a timeout
+      setTimeout(() => {
+        // Show "Document is uploaded" after the upload is complete
+        onFileUpload('uploaded', file);
+      }, 3000); // 3 seconds delay to simulate upload
     }
   };
 
