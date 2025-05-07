@@ -1,6 +1,24 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 function MainContent() {
+  // Create a reference for the file input
+  const fileInputRef = useRef(null);
+  
+  // Function to handle file selection
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      console.log('File selected:', file.name);
+      // Here you can continue with the flow as it is
+      // For example, you might want to upload the file or process it
+    }
+  };
+
+  // Function to trigger file input click
+  const handleCreateProposal = () => {
+    fileInputRef.current.click();
+  };
+
   const taskOptions = [
     {
       title: 'Create a new proposal',
@@ -60,6 +78,15 @@ function MainContent() {
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-8">
+      {/* Hidden file input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+        accept=".pdf,.doc,.docx,.txt"
+      />
+      
       <div className="mb-8 flex flex-col items-center">
         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center mb-4">
           <div className="w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center">
@@ -74,6 +101,7 @@ function MainContent() {
           <button 
             key={index}
             className="bg-gray-800 hover:bg-gray-700 rounded-lg p-4 text-left transition-colors"
+            onClick={option.title === 'Create a new proposal' ? handleCreateProposal : undefined}
           >
             <h3 className="font-medium text-lg">{option.title}</h3>
             <p className="text-gray-400 text-sm mt-1">{option.description}</p>
