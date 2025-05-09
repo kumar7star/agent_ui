@@ -6,8 +6,12 @@ const { User } = require('../models');
  * Protect routes - Verify JWT token
  */
 const protect = async (req, res, next) => {
-  let token;
+  // Skip auth if not implemented or during dev
+  if (process.env.SKIP_AUTH === 'true') {
+    return next();
+  }
 
+  let token;
   // Check if token exists in headers
   if (
     req.headers.authorization &&

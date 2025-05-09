@@ -19,7 +19,7 @@ function MainContent({ onFileUpload }) {
         formData.append('file', file);
         
         // Send the file to the API
-        const response = await fetch('/api/upload/file', {
+        const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/api/upload/file`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}` // Assuming token is stored in localStorage
