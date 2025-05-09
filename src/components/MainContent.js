@@ -5,7 +5,7 @@ function MainContent({ onFileUpload }) {
   const fileInputRef = useRef(null);
   
   // Function to handle file selection
-  const handleFileChange = (event) => {
+  const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
       console.log('File selected:', file.name);
@@ -13,11 +13,35 @@ function MainContent({ onFileUpload }) {
       // Show "Document is uploading" in the chat panel
       onFileUpload('uploading', file);
       
-      // Simulate file upload with a timeout
-      setTimeout(() => {
+      try {
+        // Create a FormData object to send the file
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        // Send the file to the API
+        const response = await fetch('/api/upload/file', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}` // Assuming token is stored in localStorage
+          },
+          body: formData
+        });
+        
+        if (!response.ok) {
+          throw new Error('File upload failed');
+        }
+        
+        const data = await response.json();
+        console.log('Upload successful:', data);
+        
         // Show "Document is uploaded" after the upload is complete
         onFileUpload('uploaded', file);
-      }, 3000); // 3 seconds delay to simulate upload
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        // Handle upload error (optional)
+        alert('Failed to upload file. Please try again.');
+        onFileUpload(null, null); // Reset upload status
+      }
     }
   };
 
