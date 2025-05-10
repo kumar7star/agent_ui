@@ -2,6 +2,87 @@ import React, { useState } from 'react';
 
 function ChatPanel({ onClose, uploadStatus, selectedFile }) {
   const [message, setMessage] = useState('');
+  const [chatMessages, setChatMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Function to send message to API
+  const sendMessage = async () => {
+    if (!message.trim()) return;
+    
+    // Add user message to chat
+    const userMessage = {
+      role: 'user',
+      content: message
+    };
+    
+    setChatMessages(prevMessages => [...prevMessages, userMessage]);
+    setIsLoading(true);
+    
+    try {
+      // Prepare the request body
+      const requestBody = {
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: message
+              }
+            ]
+          }
+        ],
+        model: 'claude-3-opus-20240229'
+      };
+      
+      // Send the request to the API
+      const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT || ''}/api/ai/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // Assuming token is stored in localStorage
+        },
+        body: JSON.stringify(requestBody)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to get response from AI');
+      }
+      
+      const data = await response.json();
+      
+      // Add assistant response to chat
+      if (data.success && data.data && data.data.content) {
+        const assistantMessage = {
+          role: 'assistant',
+          content: data.data.content
+        };
+        
+        setChatMessages(prevMessages => [...prevMessages, assistantMessage]);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Add error message to chat
+      setChatMessages(prevMessages => [
+        ...prevMessages, 
+        {
+          role: 'assistant',
+          content: 'Sorry, I encountered an error processing your request. Please try again.'
+        }
+      ]);
+    } finally {
+      setIsLoading(false);
+      setMessage(''); // Clear input field
+    }
+  };
+  
+  // Handle Enter key press
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
   
   const tools = [
     { name: 'Google Search', icon: 'G', color: 'bg-white' },
@@ -39,6 +120,34 @@ function ChatPanel({ onClose, uploadStatus, selectedFile }) {
     }
   };
 
+  // Function to render chat messages
+  const renderChatMessages = () => {
+    if (chatMessages.length === 0) {
+      // Show welcome message if no messages and no upload status
+      if (!uploadStatus) {
+        return (
+          <div className="bg-gray-700 rounded-lg p-3 mb-4">
+            <p className="text-sm">
+              Hello, I'm Analyst Sam. How may I assist you today?
+            </p>
+          </div>
+        );
+      }
+      return null;
+    }
+    
+    return chatMessages.map((msg, index) => (
+      <div 
+        key={index} 
+        className={`mb-4 ${msg.role === 'user' ? 'ml-auto max-w-[80%]' : 'mr-auto max-w-[80%]'}`}
+      >
+        <div className={`rounded-lg p-3 ${msg.role === 'user' ? 'bg-blue-600' : 'bg-gray-700'}`}>
+          <p className="text-sm">{typeof msg.content === 'string' ? msg.content : msg.content}</p>
+        </div>
+      </div>
+    ));
+  };
+  
   // Render upload status message
   const renderUploadStatus = () => {
     if (!uploadStatus || !selectedFile) return null;
@@ -140,17 +249,22 @@ function ChatPanel({ onClose, uploadStatus, selectedFile }) {
       
       {/* Chat Messages */}
       <div className="flex-1 overflow-auto p-4">
-        {/* Welcome message (only show if no upload status) */}
-        {!uploadStatus && (
-          <div className="bg-gray-700 rounded-lg p-3 mb-4">
-            <p className="text-sm">
-              Hello, I'm Analyst Sam. How may I assist you today?
-            </p>
-          </div>
-        )}
-        
         {/* Upload status message */}
         {renderUploadStatus()}
+        
+        {/* Chat messages */}
+        {renderChatMessages()}
+        
+        {/* Loading indicator */}
+        {isLoading && (
+          <div className="flex justify-center items-center my-4">
+            <div className="animate-pulse flex space-x-2">
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Input */}
@@ -162,10 +276,15 @@ function ChatPanel({ onClose, uploadStatus, selectedFile }) {
             placeholder="Type something"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
           />
-          <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-blue-300">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd" />
+          <button 
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-blue-300"
+            onClick={sendMessage}
+            disabled={isLoading}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
             </svg>
           </button>
         </div>
