@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 /**
- * @desc    Send messages to Anthropic AI API
+ * @desc    Send messages to AI API (Anthropic or Groq)
  * @route   POST /api/ai/messages
  * @access  Private
  */
@@ -57,39 +57,103 @@ const sendMessages = async (req, res) => {
       }
     }
 
-    // Check if Anthropic API key is set
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return res.status(500).json({
-        success: false,
-        message: 'Anthropic API key is not configured',
+    // Determine which API to use based on the model or configuration
+    const isGroqModel = model.startsWith('llama') || model.startsWith('mixtral') || process.env.USE_GROQ_API === 'true';
+    
+    if (isGroqModel) {
+      // Use Groq API
+      if (!process.env.GROQ_API_KEY) {
+        return res.status(500).json({
+          success: false,
+          message: 'Groq API key is not configured',
+        });
+      }
+
+      // Convert messages format for Groq if needed
+      const groqMessages = messages.map(message => {
+        // For Groq, we need to convert the content array to a single string for text messages
+        if (message.content && Array.isArray(message.content)) {
+          const textContent = message.content
+            .filter(item => item.type === 'text')
+            .map(item => item.text)
+            .join('\n');
+          
+          return {
+            role: message.role,
+            content: textContent
+          };
+        }
+        return message;
+      });
+
+      // Prepare the request to Groq API
+      const response = await axios.post(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          model: isGroqModel ? model : 'llama3-70b-8192', // Default to llama3 if model not specified
+          messages: groqMessages,
+          max_tokens: max_tokens,
+          temperature: 0.7,
+          system: system || undefined
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+          },
+        }
+      );
+
+      // Transform Groq response to match Anthropic format for consistency
+      const transformedResponse = {
+        id: response.data.id,
+        content: response.data.choices[0].message.content,
+        model: response.data.model,
+        role: 'assistant',
+        stop_reason: response.data.choices[0].finish_reason,
+        type: 'message'
+      };
+
+      // Return the transformed response
+      return res.status(200).json({
+        success: true,
+        data: transformedResponse,
+      });
+    } else {
+      // Use Anthropic API
+      if (!process.env.ANTHROPIC_API_KEY) {
+        return res.status(500).json({
+          success: false,
+          message: 'Anthropic API key is not configured',
+        });
+      }
+
+      // Prepare the request to Anthropic API
+      const response = await axios.post(
+        'https://api.anthropic.com/v1/messages',
+        {
+          model,
+          messages,
+          max_tokens,
+          system,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': process.env.ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01',
+          },
+        }
+      );
+
+      // Return the response from Anthropic
+      return res.status(200).json({
+        success: true,
+        data: response.data,
       });
     }
-
-    // Prepare the request to Anthropic API
-    const response = await axios.post(
-      'https://api.anthropic.com/v1/messages',
-      {
-        model,
-        messages,
-        max_tokens,
-        system,
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-        },
-      }
-    );
-
-    // Return the response from Anthropic
-    return res.status(200).json({
-      success: true,
-      data: response.data,
-    });
   } catch (error) {
-    console.error('Error calling Anthropic API:', error.response?.data || error.message);
+    console.error('Error calling AI API:', error.response?.data || error.message);
     
     return res.status(error.response?.status || 500).json({
       success: false,
@@ -102,4 +166,3 @@ const sendMessages = async (req, res) => {
 module.exports = {
   sendMessages,
 };
-
