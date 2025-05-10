@@ -6,8 +6,9 @@ const { User } = require('../models');
  * Protect routes - Verify JWT token
  */
 const protect = async (req, res, next) => {
-  // Skip auth if not implemented or during dev
+  // Check if SKIP_AUTH is enabled for development
   if (process.env.SKIP_AUTH === 'true') {
+    // For development only - skip authentication
     return next();
   }
 
@@ -64,4 +65,3 @@ module.exports = {
   protect,
   admin,
 };
-
