@@ -4,6 +4,18 @@ function ChatPanel({ onClose, uploadStatus, selectedFile }) {
   const [message, setMessage] = useState('');
   const [chatMessages, setChatMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('claude-3-opus-20240229');
+  const [showModelSelector, setShowModelSelector] = useState(false);
+  
+  // Available AI models
+  const aiModels = [
+    { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', provider: 'Anthropic' },
+    { id: 'claude-3-sonnet-20240229', name: 'Claude 3 Sonnet', provider: 'Anthropic' },
+    { id: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku', provider: 'Anthropic' },
+    { id: 'llama3-70b-8192', name: 'Llama 3 70B', provider: 'Groq' },
+    { id: 'llama3-8b-8192', name: 'Llama 3 8B', provider: 'Groq' },
+    { id: 'mixtral-8x7b-32768', name: 'Mixtral 8x7B', provider: 'Groq' }
+  ];
   
   // Function to send message to API
   const sendMessage = async () => {
@@ -32,7 +44,7 @@ function ChatPanel({ onClose, uploadStatus, selectedFile }) {
             ]
           }
         ],
-        model: 'claude-3-opus-20240229'
+        model: selectedModel
       };
       
       // Send the request to the API
@@ -82,6 +94,23 @@ function ChatPanel({ onClose, uploadStatus, selectedFile }) {
       e.preventDefault();
       sendMessage();
     }
+  };
+  
+  // Toggle model selector
+  const toggleModelSelector = () => {
+    setShowModelSelector(!showModelSelector);
+  };
+  
+  // Select a model
+  const selectModel = (modelId) => {
+    setSelectedModel(modelId);
+    setShowModelSelector(false);
+  };
+  
+  // Get current model name
+  const getCurrentModelName = () => {
+    const model = aiModels.find(m => m.id === selectedModel);
+    return model ? model.name : 'Select Model';
   };
   
   const tools = [
@@ -210,10 +239,32 @@ function ChatPanel({ onClose, uploadStatus, selectedFile }) {
           <div>
             <h3 className="font-medium flex items-center">
               Analyst Sam
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              <button onClick={toggleModelSelector} className="ml-1 focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
             </h3>
+            <div className="text-xs text-gray-400">{getCurrentModelName()}</div>
+            
+            {/* Model Selector Dropdown */}
+            {showModelSelector && (
+              <div className="absolute mt-1 bg-gray-700 rounded-md shadow-lg z-10 w-64">
+                <div className="py-1">
+                  <div className="px-3 py-2 text-xs font-semibold text-gray-400 border-b border-gray-600">Select AI Model</div>
+                  {aiModels.map((model) => (
+                    <button
+                      key={model.id}
+                      className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-600 ${selectedModel === model.id ? 'bg-gray-600' : ''}`}
+                      onClick={() => selectModel(model.id)}
+                    >
+                      <div>{model.name}</div>
+                      <div className="text-xs text-gray-400">{model.provider}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center space-x-2">
