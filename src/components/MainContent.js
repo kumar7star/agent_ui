@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 
-function MainContent({ onFileUpload }) {
+function MainContent({ onFileUpload, onSendMessage }) {
   // Create a reference for the file input
   const fileInputRef = useRef(null);
   
@@ -48,6 +48,13 @@ function MainContent({ onFileUpload }) {
   // Function to trigger file input click
   const handleCreateProposal = () => {
     fileInputRef.current.click();
+  };
+
+  // Function to handle "Create a RFP" button click
+  const handleCreateRFP = () => {
+    if (onSendMessage) {
+      onSendMessage("Create a RFP");
+    }
   };
 
   const taskOptions = [
@@ -132,7 +139,13 @@ function MainContent({ onFileUpload }) {
           <button 
             key={index}
             className="bg-gray-800 hover:bg-gray-700 rounded-lg p-4 text-left transition-colors"
-            onClick={option.title === 'Create a new proposal' ? handleCreateProposal : undefined}
+            onClick={
+              option.title === 'Create a new proposal' 
+                ? handleCreateProposal 
+                : option.title === 'Create a RFP'
+                  ? handleCreateRFP
+                  : undefined
+            }
           >
             <h3 className="font-medium text-lg">{option.title}</h3>
             <p className="text-gray-400 text-sm mt-1">{option.description}</p>

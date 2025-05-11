@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Sidebar from './components/Sidebar';
 import MainContent from './components/MainContent';
 import ChatPanel from './components/ChatPanel';
@@ -7,6 +7,7 @@ function App() {
   const [isChatOpen, setIsChatOpen] = useState(true);
   const [uploadStatus, setUploadStatus] = useState(null); // null, 'uploading', or 'uploaded'
   const [selectedFile, setSelectedFile] = useState(null);
+  const chatPanelRef = useRef(null);
 
   // Function to handle file upload status changes
   const handleFileUpload = (status, file = null) => {
@@ -17,6 +18,17 @@ function App() {
     // Ensure chat panel is open when uploading
     if (status && !isChatOpen) {
       setIsChatOpen(true);
+    }
+  };
+
+  // Function to handle sending a specific message
+  const handleSendMessage = (messageText) => {
+    if (chatPanelRef.current && chatPanelRef.current.sendMessage) {
+      chatPanelRef.current.sendMessage(messageText);
+      // Ensure chat panel is open when sending a message
+      if (!isChatOpen) {
+        setIsChatOpen(true);
+      }
     }
   };
 
@@ -50,10 +62,14 @@ function App() {
           </div>
         </header>
         <main className="flex-1 overflow-auto relative">
-          <MainContent onFileUpload={handleFileUpload} />
+          <MainContent 
+            onFileUpload={handleFileUpload} 
+            onSendMessage={handleSendMessage}
+          />
           {isChatOpen && (
             <div className="absolute top-0 right-0 w-80 h-full">
               <ChatPanel 
+                ref={chatPanelRef}
                 onClose={() => setIsChatOpen(false)} 
                 uploadStatus={uploadStatus}
                 selectedFile={selectedFile}

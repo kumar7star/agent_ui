@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 
-function ChatPanel({ onClose, uploadStatus, selectedFile }) {
+const ChatPanel = forwardRef(({ onClose, uploadStatus, selectedFile }, ref) => {
   const [message, setMessage] = useState('');
   const [chatMessages, setChatMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -18,13 +18,14 @@ function ChatPanel({ onClose, uploadStatus, selectedFile }) {
   ];
   
   // Function to send message to API
-  const sendMessage = async () => {
-    if (!message.trim()) return;
+  const sendMessage = async (customMessage = null) => {
+    const messageToSend = customMessage || message;
+    if (!messageToSend.trim()) return;
     
     // Add user message to chat
     const userMessage = {
       role: 'user',
-      content: message
+      content: messageToSend
     };
     
     setChatMessages(prevMessages => [...prevMessages, userMessage]);
@@ -39,7 +40,7 @@ function ChatPanel({ onClose, uploadStatus, selectedFile }) {
             content: [
               {
                 type: 'text',
-                text: message
+                text: messageToSend
               }
             ]
           }
@@ -87,6 +88,11 @@ function ChatPanel({ onClose, uploadStatus, selectedFile }) {
       setMessage(''); // Clear input field
     }
   };
+
+  // Expose the sendMessage function to parent components
+  useImperativeHandle(ref, () => ({
+    sendMessage: (customMessage) => sendMessage(customMessage)
+  }));
   
   // Handle Enter key press
   const handleKeyPress = (e) => {
@@ -342,6 +348,6 @@ function ChatPanel({ onClose, uploadStatus, selectedFile }) {
       </div>
     </div>
   );
-}
+});
 
 export default ChatPanel;
