@@ -4,17 +4,17 @@ const ChatPanel = forwardRef(({ onClose, uploadStatus, selectedFile }, ref) => {
   const [message, setMessage] = useState('');
   const [chatMessages, setChatMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('claude-3-opus-20240229');
+  const [selectedModel, setSelectedModel] = useState('llama3-70b-8192');
   const [showModelSelector, setShowModelSelector] = useState(false);
   
   // Available AI models
   const aiModels = [
-    { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', provider: 'Anthropic' },
-    { id: 'claude-3-sonnet-20240229', name: 'Claude 3 Sonnet', provider: 'Anthropic' },
-    { id: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku', provider: 'Anthropic' },
     { id: 'llama3-70b-8192', name: 'Llama 3 70B', provider: 'Groq' },
     { id: 'llama3-8b-8192', name: 'Llama 3 8B', provider: 'Groq' },
-    { id: 'mixtral-8x7b-32768', name: 'Mixtral 8x7B', provider: 'Groq' }
+    { id: 'mixtral-8x7b-32768', name: 'Mixtral 8x7B', provider: 'Groq' },
+    { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', provider: 'Anthropic' },
+    { id: 'claude-3-sonnet-20240229', name: 'Claude 3 Sonnet', provider: 'Anthropic' },
+    { id: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku', provider: 'Anthropic' }
   ];
   
   // Function to send message to API
