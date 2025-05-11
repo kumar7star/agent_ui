@@ -217,13 +217,22 @@ const ChatPanel = forwardRef(({ onClose, uploadStatus, selectedFile }, ref) => {
             </div>
           </div>
           <div className="flex flex-col space-y-2">
-            <button className="bg-transparent hover:bg-pink-900 text-pink-500 border border-pink-500 rounded-full py-2 px-4 text-sm transition-colors">
+            <button 
+              className="bg-transparent hover:bg-pink-900 text-pink-500 border border-pink-500 rounded-full py-2 px-4 text-sm transition-colors"
+              onClick={() => sendMessage("Create a Proposal based on the uploaded document: " + selectedFile.name)}
+            >
               Create a Proposal
             </button>
-            <button className="bg-transparent hover:bg-pink-900 text-pink-500 border border-pink-500 rounded-full py-2 px-4 text-sm transition-colors">
+            <button 
+              className="bg-transparent hover:bg-pink-900 text-pink-500 border border-pink-500 rounded-full py-2 px-4 text-sm transition-colors"
+              onClick={() => sendMessage("Create Data Analysis Plan for the uploaded document: " + selectedFile.name)}
+            >
               Create Data Analysis Plan
             </button>
-            <button className="bg-transparent hover:bg-pink-900 text-pink-500 border border-pink-500 rounded-full py-2 px-4 text-sm transition-colors">
+            <button 
+              className="bg-transparent hover:bg-pink-900 text-pink-500 border border-pink-500 rounded-full py-2 px-4 text-sm transition-colors"
+              onClick={() => sendMessage("Create Development Plan based on the uploaded document: " + selectedFile.name)}
+            >
               Create Development Plan
             </button>
           </div>
