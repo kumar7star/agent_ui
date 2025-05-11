@@ -64,6 +64,13 @@ function MainContent({ onFileUpload, onSendMessage }) {
     }
   };
 
+  // Function to handle "Write technical documentation" button click
+  const handleWriteTechnicalDocumentation = () => {
+    if (onSendMessage) {
+      onSendMessage("Write technical documentation for a software project");
+    }
+  };
+
   const taskOptions = [
     {
       title: 'Create a new proposal',
@@ -79,7 +86,7 @@ function MainContent({ onFileUpload, onSendMessage }) {
       description: 'for an upcoming project',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
         </svg>
       )
     },
@@ -153,7 +160,9 @@ function MainContent({ onFileUpload, onSendMessage }) {
                   ? handleCreateRFP
                   : option.title === 'Make development plan'
                     ? handleMakeDevelopmentPlan
-                    : undefined
+                    : option.title === 'Write technical documentation'
+                      ? handleWriteTechnicalDocumentation
+                      : undefined
             }
           >
             <h3 className="font-medium text-lg">{option.title}</h3>
