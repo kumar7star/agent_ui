@@ -57,6 +57,13 @@ function MainContent({ onFileUpload, onSendMessage }) {
     }
   };
 
+  // Function to handle "Make development plan" button click
+  const handleMakeDevelopmentPlan = () => {
+    if (onSendMessage) {
+      onSendMessage("Make development plan");
+    }
+  };
+
   const taskOptions = [
     {
       title: 'Create a new proposal',
@@ -144,7 +151,9 @@ function MainContent({ onFileUpload, onSendMessage }) {
                 ? handleCreateProposal 
                 : option.title === 'Create a RFP'
                   ? handleCreateRFP
-                  : undefined
+                  : option.title === 'Make development plan'
+                    ? handleMakeDevelopmentPlan
+                    : undefined
             }
           >
             <h3 className="font-medium text-lg">{option.title}</h3>
